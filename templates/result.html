@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonaVision AI | Your Personality Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --dark: #111827;
+            --light: #F9FAFB;
+        }
+        body {
+            background: linear-gradient(135deg, #F9FAFB 0%, #EEF2FF 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header-gradient {
+            background: linear-gradient(120deg, #4F46E5, #8B5CF6, #EC4899);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 30px -12px rgba(79, 70, 229, 0.2);
+        }
+        .trait-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .trait-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2);
+        }
+        .trait-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            margin-right: 16px;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), #8B5CF6);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, var(--primary-dark), #7C3AED);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15);
+            transform: translateY(-2px);
+        }
+        .progress-bar {
+            height: 14px;
+            border-radius: 7px;
+            background: #E5E7EB;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-value {
+            height: 100%;
+            border-radius: 7px;
+            transition: width 1.5s ease;
+        }
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(236, 72, 153, 0.1) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 60%, 0 90%);
+            z-index: -1;
+        }
+        .nav-brand {
+            background: linear-gradient(90deg, #4F46E5, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .fade-in-delay-1 {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.2s forwards;
+        }
+        .fade-in-delay-2 {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.4s forwards;
+        }
+        .fade-in-delay-3 {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.6s forwards;
+        }
+        .fade-in-delay-4 {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.8s forwards;
+        }
+        .fade-in-delay-5 {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 1s forwards;
+        }
+        .trait-description {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+    <div class="animated-bg"></div>
+    
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-brain text-indigo-600 text-2xl"></i>
+                    <span class="font-extrabold text-2xl nav-brand">PersonaVision</span>
+                    <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded-full">AI</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600 hidden md:block">AI-Powered Personality Analysis</span>
+                    <div class="bg-indigo-100 rounded-full p-2">
+                        <i class="fas fa-chart-pie text-indigo-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-10 fade-in">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-4">Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Personality</span> Analysis Results</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Based on the Big Five (OCEAN) model, here's your unique personality profile</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <div class="lg:col-span-2">
+                <div class="card p-6 fade-in-delay-1">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Your Personality Radar</h2>
+                    <div class="w-full max-w-md mx-auto">
+                        <canvas id="radarChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-1">
+                <div class="card p-6 h-full fade-in-delay-1">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Personality Summary</h2>              
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            {{ summary }}
+                        </p>  
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="space-y-6 mb-10">
+            <!-- Extraversion -->
+            <div class="card p-6 trait-card fade-in-delay-1" id="extraversion-card">
+                <div class="flex items-start">
+                    <div class="trait-icon bg-indigo-100">
+                        <i class="fas fa-user text-indigo-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Extraversion</h3>
+                            <span class="text-2xl font-semibold" id="extraversion-value">{{ result.Extraversion }}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-indigo-600" id="extraversion-bar"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>Introvert</span>
+                            <span>Extrovert</span>
+                        </div>
+                        <div class="mt-4">
+                            <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center trait-toggle" data-trait="extraversion">
+                                <span>Learn more</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div class="trait-description mt-3 text-gray-600" id="extraversion-description">
+                                Extraversion reflects your level of sociability, talkativeness, and emotional expressiveness. Higher scores indicate someone who is outgoing, energetic and draws energy from social interactions. Lower scores suggest someone who prefers solitude and is more reserved.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Neuroticism -->
+            <div class="card p-6 trait-card fade-in-delay-2" id="neuroticism-card">
+                <div class="flex items-start">
+                    <div class="trait-icon bg-pink-100">
+                        <i class="fas fa-heart text-pink-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Neuroticism</h3>
+                            <span class="text-2xl font-semibold" id="neuroticism-value">{{ result.Neuroticism }}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-pink-600" id="neuroticism-bar"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>Emotionally Stable</span>
+                            <span>Emotionally Sensitive</span>
+                        </div>
+                        <div class="mt-4">
+                            <button class="text-pink-600 hover:text-pink-800 text-sm font-medium flex items-center trait-toggle" data-trait="neuroticism">
+                                <span>Learn more</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div class="trait-description mt-3 text-gray-600" id="neuroticism-description">
+                                Neuroticism relates to emotional stability and reactivity to stress. Higher scores indicate a tendency to experience negative emotions like anxiety, irritability, or depression more readily. Lower scores suggest greater emotional stability and resilience to stress.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Agreeableness -->
+            <div class="card p-6 trait-card fade-in-delay-3" id="agreeableness-card">
+                <div class="flex items-start">
+                    <div class="trait-icon bg-green-100">
+                        <i class="fas fa-handshake text-green-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Agreeableness</h3>
+                            <span class="text-2xl font-semibold" id="agreeableness-value">{{ result.Agreeableness }}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-green-600" id="agreeableness-bar"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>Critical</span>
+                            <span>Compassionate</span>
+                        </div>
+                        <div class="mt-4">
+                            <button class="text-green-600 hover:text-green-800 text-sm font-medium flex items-center trait-toggle" data-trait="agreeableness">
+                                <span>Learn more</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div class="trait-description mt-3 text-gray-600" id="agreeableness-description">
+                                Agreeableness measures how you interact with others, particularly your level of empathy, cooperation, and consideration. Higher scores indicate someone who is trusting, helpful, and compassionate. Lower scores suggest more competitive, skeptical tendencies.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conscientiousness -->
+            <div class="card p-6 trait-card fade-in-delay-4" id="conscientiousness-card">
+                <div class="flex items-start">
+                    <div class="trait-icon bg-blue-100">
+                        <i class="fas fa-tasks text-blue-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Conscientiousness</h3>
+                            <span class="text-2xl font-semibold" id="conscientiousness-value">{{ result.Conscientiousness }}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-blue-600" id="conscientiousness-bar"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>Flexible</span>
+                            <span>Organized</span>
+                        </div>
+                        <div class="mt-4">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center trait-toggle" data-trait="conscientiousness">
+                                <span>Learn more</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div class="trait-description mt-3 text-gray-600" id="conscientiousness-description">
+                                Conscientiousness relates to your approach to goals, tasks and obligations. Higher scores indicate someone who is organized, disciplined, and detail-oriented. Lower scores suggest more spontaneity, flexibility, and a casual approach to responsibilities.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Openness -->
+            <!-- <div class="card p-6 trait-card fade-in-delay-5" id="openness-card">
+                <div class="flex items-start">
+                    <div class="trait-icon bg-amber-100">
+                        <i class="fas fa-lightbulb text-amber-600 text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Openness to Experience</h3>
+                            <span class="text-2xl font-semibold" id="openness-value">{{ result.Openness }}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-amber-600" id="openness-bar"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>Practical</span>
+                            <span>Imaginative</span>
+                        </div>
+                        <div class="mt-4">
+                            <button class="text-amber-600 hover:text-amber-800 text-sm font-medium flex items-center trait-toggle" data-trait="openness">
+                                <span>Learn more</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div class="trait-description mt-3 text-gray-600" id="openness-description">
+                                Openness to Experience reflects your interest in novel ideas, creativity, and intellectual curiosity. Higher scores indicate someone who is imaginative, artistic, and enjoys abstract thinking. Lower scores suggest more conventional thinking and practical approaches.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+                    <!-- Openness -->
+                    <div class="card p-6 trait-card fade-in-delay-5" id="openness-card">
+                        <div class="flex items-start">
+                            <div class="trait-icon bg-pink-100">
+                                <i class="fas fa-lightbulb text-pink-600 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-xl font-bold text-gray-800">Openness to Experience</h3>
+                                    <span class="text-2xl font-semibold" id="openness-value">{{ result.Openness }}</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-pink-600" id="openness-bar"></div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                    <span>Practical</span>
+                                    <span>Imaginative</span>
+                                </div>
+                                <div class="mt-4">
+                                    <button class="text-pink-600 hover:text-pink-800 text-sm font-medium flex items-center trait-toggle" data-trait="openness">
+                                        <span>Learn more</span>
+                                        <i class="fas fa-chevron-down ml-1"></i>
+                                    </button>
+                                    <div class="trait-description mt-3 text-gray-600" id="openness-description">
+                                        Openness to Experience reflects your interest in novel ideas, creativity, and intellectual curiosity. Higher scores indicate someone who is imaginative, artistic, and enjoys abstract thinking. Lower scores suggest more conventional thinking and practical approaches.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+           
+    </div>
+    
+    <script>
+        // Set up the radar chart
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        const radarChart = new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Extraversion', 'Neuroticism', 'Agreeableness', 'Conscientiousness', 'Openness'],
+                datasets: [{
+                    label: 'Your Score',
+                    data: [
+                        parseFloat(document.getElementById('extraversion-value').innerText), 
+                        parseFloat(document.getElementById('neuroticism-value').innerText),
+                        parseFloat(document.getElementById('agreeableness-value').innerText),
+                        parseFloat(document.getElementById('conscientiousness-value').innerText),
+                        parseFloat(document.getElementById('openness-value').innerText)
+                    ],
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(79, 70, 229, 1)'
+                }]
+            },
+            options: {
+                elements: {
+                    line: {
+                        tension: 0.1
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            display: false,
+                            stepSize: 0.2
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 14,
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                weight: 'bold'
+                            }
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 1
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Set the width of progress bars based on trait values
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate trait bars
+            const traits = ['extraversion', 'neuroticism', 'agreeableness', 'conscientiousness', 'openness'];
+            
+            traits.forEach(trait => {
+                const value = parseFloat(document.getElementById(`${trait}-value`).innerText);
+                document.getElementById(`${trait}-bar`).style.width = `${value * 100}%`;
+                
+                // Set up toggle for trait descriptions
+                document.querySelector(`[data-trait="${trait}"]`).addEventListener('click', function() {
+                    const desc = document.getElementById(`${trait}-description`);
+                    const icon = this.querySelector('i');
+                    
+                    if (desc.style.height === '0px' || desc.style.height === '') {
+                        desc.style.height = `${desc.scrollHeight}px`;
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    } else {
+                        desc.style.height = '0px';
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
