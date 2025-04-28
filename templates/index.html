@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonaVision AI | Video Personality Analysis</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --dark: #111827;
+            --light: #F9FAFB;
+        }
+        body {
+            background: linear-gradient(135deg, #F9FAFB 0%, #EEF2FF 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header-gradient {
+            background: linear-gradient(120deg, #4F46E5, #8B5CF6, #EC4899);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            border: 3px dashed #CBD5E1;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .file-upload-wrapper:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
+            transform: translateY(-2px);
+        }
+        .file-upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 30px -12px rgba(79, 70, 229, 0.2);
+        }
+        .trait-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin: 0 auto 8px;
+            transition: transform 0.3s ease;
+        }
+        .trait-icon:hover {
+            transform: scale(1.1);
+        }
+        .btn-analyze {
+            background: linear-gradient(to right, var(--primary), #8B5CF6);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
+        }
+        .btn-analyze:hover {
+            background: linear-gradient(to right, var(--primary-dark), #7C3AED);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.15);
+        }
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(236, 72, 153, 0.1) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 60%, 0 90%);
+            z-index: -1;
+        }
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #4B5563;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .nav-brand {
+            background: linear-gradient(90deg, #4F46E5, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+    <div class="animated-bg"></div>
+    
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-brain text-indigo-600 text-2xl"></i>
+                    <span class="font-extrabold text-2xl nav-brand">PersonaVision</span>
+                    <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded-full">AI</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600 hidden md:block">AI-Powered Personality Analysis</span>
+                    <div class="bg-indigo-100 rounded-full p-2">
+                        <i class="fas fa-chart-pie text-indigo-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-14">
+            <h1 class="text-5xl font-extrabold text-gray-800 mb-4">Discover Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Personality</span> Profile</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">Upload your video resume and our advanced AI will analyze your personality traits based on the internationally recognized Big Five (OCEAN) model.</p>
+        </div>
+        
+        <div class="max-w-2xl mx-auto">
+            <div class="card">
+                <div class="header-gradient text-white p-6 text-center">
+                    <h2 class="text-3xl font-bold mb-2">Personality Analysis</h2>
+                    <p class="opacity-90">Upload a video to discover your personality traits</p>
+                </div>
+                
+                <div class="p-8">
+                    <div class="mb-8">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-indigo-100 p-2 rounded-full mr-3">
+                                <i class="fas fa-info-circle text-indigo-600"></i>
+                            </div>
+                            <span class="text-gray-800 font-semibold">How It Works</span>
+                        </div>
+                        <p class="text-gray-600 mb-4 pl-12">Upload a video of yourself speaking for at least 30 seconds. Our AI analyzes your speech patterns, expressions, and mannerisms to identify key personality traits.</p>
+                    </div>
+                    
+                    <form action="/predict" method="post" enctype="multipart/form-data" id="upload-form">
+                        <div class="file-upload-wrapper mb-6">
+                            <input type="file" name="video" accept=".mp4" required class="file-upload-input" id="video-upload">
+                            <div class="text-center" id="upload-content">
+                                <i class="fas fa-cloud-upload-alt upload-icon pulse"></i>
+                                <div class="text-gray-800 font-semibold">Drag & drop your video or click to browse</div>
+                                <div class="text-gray-500 text-sm mt-1">MP4 format recommended (Max 100MB)</div>
+                            </div>
+                        </div>
+                        <div class="file-name text-center" id="file-name"></div>
+                        
+                        <button type="submit" class="mt-8 w-full py-4 px-6 btn-analyze text-white font-bold rounded-xl transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center text-lg">
+                            <i class="fas fa-brain mr-3"></i>
+                            Analyze My Personality
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="bg-gray-50 px-8 py-6 border-t border-gray-100">
+                    <h3 class="text-center text-gray-700 font-semibold mb-6">The Big Five Personality Traits</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="text-center">
+                            <div class="trait-icon bg-indigo-100">
+                                <i class="fas fa-user text-indigo-600 text-xl"></i>
+                            </div>
+                            <div class="text-sm font-medium text-gray-700">Extraversion</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="trait-icon bg-pink-100">
+                                <i class="fas fa-heart text-pink-600 text-xl"></i>
+                            </div>
+                            <div class="text-sm font-medium text-gray-700">Neuroticism</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="trait-icon bg-green-100">
+                                <i class="fas fa-handshake text-green-600 text-xl"></i>
+                            </div>
+                            <div class="text-sm font-medium text-gray-700">Agreeableness</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="trait-icon bg-blue-100">
+                                <i class="fas fa-tasks text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="text-sm font-medium text-gray-700">Conscientiousness</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="trait-icon bg-yellow-100">
+                                <i class="fas fa-lightbulb text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="text-sm font-medium text-gray-700">Openness</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center text-sm text-gray-500 bg-white p-4 rounded-lg shadow-sm">
+                <div class="flex items-center justify-center mb-2">
+                    <i class="fas fa-shield-alt text-indigo-500 mr-2"></i>
+                    <span class="font-medium text-gray-700">Privacy Guarantee</span>
+                </div>
+                <p>Your videos are processed securely and not stored after analysis. We respect your privacy.</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-900 text-white py-8 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fas fa-brain text-indigo-400 text-xl mr-2"></i>
+                        <span class="font-bold text-xl">PersonaVision AI</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-2">Discover the science of personality</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                <div class="text-gray-400 text-sm mt-6 md:mt-0">
+                    © 2025 PersonaVision AI. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('video-upload').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('upload-content').innerHTML = '<i class="fas fa-check-circle text-green-500 text-5xl mb-2"></i><div class="text-gray-800 font-semibold">Video selected successfully</div>';
+                document.getElementById('file-name').textContent = e.target.files[0].name;
+                
+                // Change button color to indicate ready state
+                const button = document.querySelector('.btn-analyze');
+                button.classList.remove('bg-indigo-600');
+                button.classList.add('bg-green-600');
+                button.innerHTML = '<i class="fas fa-check-circle mr-3"></i> Ready to Analyze';
+                
+                // Add animation to button
+                button.classList.add('animate-pulse');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+</head>
+<body>
+    <h2>Predicted Personality Traits:</h2>
+    <ul>
+        {% for trait, value in result.items() %}
+        <li><strong>{{ trait }}:</strong> {{ value }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Predict another</a>
+</body>
+</html>
